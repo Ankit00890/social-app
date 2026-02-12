@@ -13,35 +13,37 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
-            <div className="max-w-6xl mx-auto px-4">
+        <nav className="sticky top-0 z-50 glass mb-6">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
-                    <Link to="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                            <span className="text-white font-bold text-xl">S</span>
+                    <Link to="/" className="flex items-center gap-2 group">
+                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg group-hover:scale-105 transition-transform duration-200">
+                            S
                         </div>
-                        <span className="text-xl font-bold text-gray-900 hidden sm:block">SocialApp</span>
+                        <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 hidden sm:block">
+                            SocialApp
+                        </span>
                     </Link>
 
                     {/* Navigation Links */}
                     {user && (
-                        <div className="hidden md:flex items-center space-x-8">
-                            <Link to="/" className="flex flex-col items-center text-blue-600">
-                                <Home size={24} />
-                                <span className="text-xs mt-1 font-medium">Home</span>
+                        <div className="hidden md:flex items-center space-x-1">
+                            <Link to="/" className="flex flex-col items-center px-4 py-2 rounded-xl text-gray-500 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all duration-200 group">
+                                <Home size={24} className="group-hover:scale-110 transition-transform duration-200" />
+                                <span className="text-[10px] font-semibold mt-1">Home</span>
                             </Link>
-                            <Link to="/explore" className="flex flex-col items-center text-gray-500 hover:text-gray-900 transition-colors">
-                                <Search size={24} />
-                                <span className="text-xs mt-1 font-medium">Explore</span>
+                            <Link to="/explore" className="flex flex-col items-center px-4 py-2 rounded-xl text-gray-500 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all duration-200 group">
+                                <Search size={24} className="group-hover:scale-110 transition-transform duration-200" />
+                                <span className="text-[10px] font-semibold mt-1">Explore</span>
                             </Link>
-                            <Link to="/notifications" className="flex flex-col items-center text-gray-500 hover:text-gray-900 transition-colors">
-                                <Bell size={24} />
-                                <span className="text-xs mt-1 font-medium">Notifications</span>
+                            <Link to="/notifications" className="flex flex-col items-center px-4 py-2 rounded-xl text-gray-500 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all duration-200 group">
+                                <Bell size={24} className="group-hover:scale-110 transition-transform duration-200" />
+                                <span className="text-[10px] font-semibold mt-1">Notifications</span>
                             </Link>
-                            <Link to="/messages" className="flex flex-col items-center text-gray-500 hover:text-gray-900 transition-colors">
-                                <MessageSquare size={24} />
-                                <span className="text-xs mt-1 font-medium">Messages</span>
+                            <Link to="/messages" className="flex flex-col items-center px-4 py-2 rounded-xl text-gray-500 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all duration-200 group">
+                                <MessageSquare size={24} className="group-hover:scale-110 transition-transform duration-200" />
+                                <span className="text-[10px] font-semibold mt-1">Messages</span>
                             </Link>
                         </div>
                     )}
@@ -50,19 +52,26 @@ const Navbar = () => {
                     <div className="flex items-center gap-4">
                         {user ? (
                             <div className="flex items-center gap-4">
-                                <Link to="/profile" className="flex items-center gap-2 hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                                <Link to="/profile" className="flex items-center gap-2 hover:bg-gray-50 p-1.5 pr-3 rounded-full border border-transparent hover:border-gray-200 transition-all duration-200">
                                     <img
                                         src={user.pic || 'https://via.placeholder.com/40'}
                                         alt={user.name}
-                                        className="h-8 w-8 rounded-full object-cover border border-gray-200"
+                                        className="h-9 w-9 rounded-full object-cover border-2 border-white shadow-sm"
                                     />
-                                    <span className="text-sm font-medium text-gray-700 hidden sm:block">
-                                        {user.name}
-                                    </span>
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-semibold text-gray-700 leading-tight">
+                                            {user.name}
+                                        </span>
+                                        {user.isAdmin && (
+                                            <span className="text-[10px] uppercase tracking-wider font-bold text-indigo-600">
+                                                Admin
+                                            </span>
+                                        )}
+                                    </div>
                                 </Link>
                                 <button
                                     onClick={handleLogout}
-                                    className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
                                     title="Logout"
                                 >
                                     <LogOut size={20} />
@@ -70,10 +79,10 @@ const Navbar = () => {
                             </div>
                         ) : (
                             <div className="flex items-center gap-3">
-                                <Link to="/login" className="text-sm font-medium text-gray-700 hover:text-blue-600">
+                                <Link to="/login" className="text-sm font-semibold text-gray-600 hover:text-indigo-600 transition-colors">
                                     Login
                                 </Link>
-                                <Link to="/signup" className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                <Link to="/signup" className="btn-primary px-5 py-2.5 rounded-full text-sm font-semibold">
                                     Sign Up
                                 </Link>
                             </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, MessageCircle, Share2, MoreHorizontal, Send, ShieldCheck, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle, Share2, MoreHorizontal, Send, ShieldCheck, Trash2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useAuth from '../../hooks/useAuth';
 
@@ -14,7 +14,23 @@ const Post = ({ post, onDelete }) => {
     const [isAdminReplyMode, setIsAdminReplyMode] = useState(false);
     const [loadingComments, setLoadingComments] = useState(false);
 
+    const timeAgo = (date) => {
+        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+        if (seconds < 60) return 'just now';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        if (days < 7) return `${days}d ago`;
+        return new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    };
+
     const handleLike = async () => {
+        if (!user) {
+            toast.error('Login to like posts');
+            return;
+        }
         try {
             const res = await fetch(`/api/posts/${post._id}/like`, {
                 method: 'PUT',
@@ -25,7 +41,6 @@ const Post = ({ post, onDelete }) => {
             if (res.ok) {
                 setLiked(!liked);
                 setLikeCount(prev => liked ? prev - 1 : prev + 1);
-                if (!liked) toast.success('Post liked!');
             }
         } catch (error) {
             console.error('Error liking post:', error);
@@ -104,7 +119,7 @@ const Post = ({ post, onDelete }) => {
                 setComments([...comments, populatedComment]);
                 setCommentContent('');
                 setIsAdminReplyMode(false);
-                toast.success('Comment added!');
+                toast.success(isAdminReplyMode ? 'Admin reply posted!' : 'Comment added!');
             }
         } catch (error) {
             console.error('Error adding comment:', error);
@@ -113,7 +128,7 @@ const Post = ({ post, onDelete }) => {
     };
 
     const handleDeleteComment = async (commentId) => {
-        if (!window.confirm('Are you sure you want to delete this comment?')) return;
+        if (!window.confirm('Delete this comment?')) return;
         try {
             const res = await fetch(`/api/posts/${post._id}/comments/${commentId}`, {
                 method: 'DELETE',
@@ -132,6 +147,7 @@ const Post = ({ post, onDelete }) => {
     };
 
     const handleLikeComment = async (commentId) => {
+        if (!user) return;
         try {
             const res = await fetch(`/api/posts/${post._id}/comments/${commentId}/like`, {
                 method: 'PUT',
@@ -151,57 +167,51 @@ const Post = ({ post, onDelete }) => {
             }
         } catch (error) {
             console.error('Error liking comment:', error);
-            toast.error('Failed to like comment');
         }
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6 overflow-hidden hover:shadow-md transition-shadow"
-        >
-            <div className="p-4">
+        <div className="glass-card rounded-2xl overflow-hidden group">
+            <div className="p-5">
+                {/* Post Header */}
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                        <img
-                            src={post.user?.profilePic || 'https://via.placeholder.com/40'}
-                            alt="Profile"
-                            className="w-10 h-10 rounded-full object-cover border border-gray-100"
-                        />
+                        <div className="relative">
+                            <img
+                                src={post.user?.profilePic || 'https://via.placeholder.com/40'}
+                                alt="Profile"
+                                className="w-11 h-11 rounded-full object-cover border-2 border-white shadow-sm"
+                            />
+                        </div>
                         <div>
-                            <h3 className="font-semibold text-gray-900">{post.user?.name || 'Unknown User'}</h3>
-                            <p className="text-gray-500 text-xs">
-                                {new Date(post.createdAt).toLocaleDateString(undefined, {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                })}
-                            </p>
+                            <h3 className="font-semibold text-gray-900 text-[15px]">{post.user?.name || 'Unknown User'}</h3>
+                            <div className="flex items-center gap-1 text-gray-400">
+                                <Clock size={12} />
+                                <span className="text-xs">{timeAgo(post.createdAt)}</span>
+                            </div>
                         </div>
                     </div>
                     {/* Actions Menu */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                         {(user?._id === post.user?._id || user?.isAdmin) && (
-                            <button
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
                                 onClick={handleDeletePost}
-                                className="text-gray-400 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-full"
+                                className="text-gray-300 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-xl"
                                 title="Delete Post"
                             >
-                                <Trash2 size={20} />
-                            </button>
+                                <Trash2 size={18} />
+                            </motion.button>
                         )}
-                        <button className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-50 rounded-full">
-                            <MoreHorizontal size={20} />
-                        </button>
                     </div>
                 </div>
 
-                <p className="text-gray-800 mb-4 leading-relaxed">{post.content}</p>
+                {/* Post Content */}
+                <p className="text-gray-800 mb-4 leading-relaxed text-[15px]">{post.content}</p>
 
                 {post.image && (
-                    <div className="relative -mx-4 mb-4">
+                    <div className="relative -mx-5 mb-4">
                         <img
                             src={post.image}
                             alt="Post content"
@@ -211,25 +221,32 @@ const Post = ({ post, onDelete }) => {
                     </div>
                 )}
 
-                <div className="flex items-center justify-between pt-2 border-t border-gray-50">
-                    <div className="flex gap-6">
-                        <button
+                {/* Interaction Bar */}
+                <div className="flex items-center justify-between pt-3 border-t border-gray-100/80">
+                    <div className="flex gap-1">
+                        <motion.button
+                            whileTap={{ scale: 0.85 }}
                             onClick={handleLike}
-                            className={`flex items-center gap-2 transition-colors ${liked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 ${liked ? 'text-red-500 bg-red-50/80' : 'text-gray-400 hover:text-red-500 hover:bg-red-50/50'}`}
                         >
-                            <Heart size={20} fill={liked ? "currentColor" : "none"} />
-                            <span className="text-sm font-medium">{likeCount}</span>
-                        </button>
+                            <motion.div
+                                animate={liked ? { scale: [1, 1.3, 1] } : {}}
+                                transition={{ duration: 0.3 }}
+                            >
+                                <Heart size={20} fill={liked ? "currentColor" : "none"} />
+                            </motion.div>
+                            <span className="text-sm font-semibold">{likeCount}</span>
+                        </motion.button>
                         <button
                             onClick={fetchComments}
-                            className={`flex items-center gap-2 transition-colors ${showComments ? 'text-blue-600' : 'text-gray-500 hover:text-blue-500'}`}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 ${showComments ? 'text-indigo-600 bg-indigo-50/80' : 'text-gray-400 hover:text-indigo-500 hover:bg-indigo-50/50'}`}
                         >
                             <MessageCircle size={20} />
-                            <span className="text-sm font-medium">Comment</span>
+                            <span className="text-sm font-semibold">Comment</span>
                         </button>
                     </div>
-                    <button className="text-gray-500 hover:text-gray-700 transition-colors">
-                        <Share2 size={20} />
+                    <button className="text-gray-300 hover:text-gray-500 transition-colors p-2 rounded-xl hover:bg-gray-50">
+                        <Share2 size={18} />
                     </button>
                 </div>
 
@@ -240,115 +257,146 @@ const Post = ({ post, onDelete }) => {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="mt-4 pt-4 border-t border-gray-50"
+                            transition={{ duration: 0.3 }}
+                            className="mt-4 pt-4 border-t border-gray-100/80"
                         >
                             {/* Comment Input */}
                             {user ? (
-                                <form onSubmit={handleCommentSubmit} className="mb-6">
+                                <form onSubmit={handleCommentSubmit} className="mb-5">
                                     <div className="flex gap-3">
                                         <img
                                             src={user.pic || 'https://via.placeholder.com/32'}
                                             alt="User"
-                                            className="w-8 h-8 rounded-full object-cover"
+                                            className="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm flex-shrink-0"
                                         />
                                         <div className="flex-1">
                                             <input
                                                 type="text"
                                                 value={commentContent}
                                                 onChange={(e) => setCommentContent(e.target.value)}
-                                                placeholder={isAdminReplyMode ? "Write an official reply..." : "Write a comment..."}
-                                                className={`w-full px-4 py-2 rounded-2xl bg-gray-50 border focus:outline-none transition-all ${isAdminReplyMode ? 'border-red-200 focus:ring-2 focus:ring-red-100 bg-red-50' : 'border-gray-200 focus:ring-2 focus:ring-blue-100'}`}
+                                                placeholder={isAdminReplyMode ? "Write an official admin reply..." : "Write a comment..."}
+                                                className={`w-full px-4 py-2.5 rounded-2xl border text-sm focus:outline-none transition-all duration-200 ${isAdminReplyMode
+                                                        ? 'border-amber-200 focus:ring-2 focus:ring-amber-100 bg-amber-50/50 placeholder-amber-400'
+                                                        : 'border-gray-200 focus:ring-2 focus:ring-indigo-100 bg-gray-50/50 placeholder-gray-400'
+                                                    }`}
                                             />
                                             <div className="flex justify-between items-center mt-2">
                                                 {user.isAdmin && (
-                                                    <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-600 hover:text-gray-800">
+                                                    <label className="flex items-center gap-2 cursor-pointer text-xs transition-colors group">
                                                         <input
                                                             type="checkbox"
                                                             checked={isAdminReplyMode}
                                                             onChange={(e) => setIsAdminReplyMode(e.target.checked)}
-                                                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                                                            className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                                                         />
-                                                        <ShieldCheck size={14} className={isAdminReplyMode ? "text-red-600" : "text-gray-400"} />
-                                                        Post as Admin Reply
+                                                        <ShieldCheck size={14} className={isAdminReplyMode ? "text-amber-600" : "text-gray-400"} />
+                                                        <span className={isAdminReplyMode ? 'text-amber-700 font-semibold' : 'text-gray-500'}>
+                                                            Reply as Admin
+                                                        </span>
                                                     </label>
                                                 )}
-                                                <button
+                                                <motion.button
+                                                    whileTap={{ scale: 0.9 }}
                                                     type="submit"
                                                     disabled={!commentContent.trim()}
-                                                    className={`ml-auto p-2 rounded-full transition-colors ${!commentContent.trim() ? 'text-gray-300 bg-gray-100 cursor-not-allowed' : (isAdminReplyMode ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-blue-600 text-white hover:bg-blue-700')}`}
+                                                    className={`ml-auto p-2.5 rounded-xl transition-all duration-200 ${!commentContent.trim()
+                                                            ? 'text-gray-300 bg-gray-100 cursor-not-allowed'
+                                                            : (isAdminReplyMode
+                                                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/20'
+                                                                : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md shadow-indigo-500/20')
+                                                        }`}
                                                 >
-                                                    <Send size={16} />
-                                                </button>
+                                                    <Send size={14} />
+                                                </motion.button>
                                             </div>
                                         </div>
                                     </div>
                                 </form>
                             ) : (
-                                <p className="text-center text-sm text-gray-500 mb-4">Log in to comment</p>
+                                <p className="text-center text-sm text-gray-400 mb-4 py-2">Log in to comment</p>
                             )}
 
                             {/* Comments List */}
                             {loadingComments ? (
-                                <div className="text-center py-4 text-gray-500 text-sm">Loading comments...</div>
+                                <div className="text-center py-4">
+                                    <div className="w-6 h-6 rounded-full border-2 border-indigo-100 border-t-indigo-500 animate-spin mx-auto" />
+                                </div>
                             ) : comments.length > 0 ? (
-                                <div className="space-y-4">
+                                <div className="space-y-3">
                                     {comments.map((comment) => {
                                         const isCommentLiked = comment.likes?.some(l => l.user === user?._id);
                                         return (
-                                            <div key={comment._id} className={`flex gap-3 ${comment.isAdminReply ? 'bg-red-50 p-3 rounded-lg border border-red-100' : ''}`}>
+                                            <motion.div
+                                                key={comment._id}
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className={`flex gap-3 p-3 rounded-xl transition-all ${comment.isAdminReply
+                                                        ? 'bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 shadow-sm'
+                                                        : 'hover:bg-gray-50/50'
+                                                    }`}
+                                            >
                                                 <img
-                                                    src={comment.user?.profilePic || 'https://via.placeholder.com/32'}
+                                                    src={comment.user?.profilePic || comment.user?.pic || 'https://via.placeholder.com/32'}
                                                     alt={comment.user?.name}
-                                                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                                                    className={`w-8 h-8 rounded-full object-cover flex-shrink-0 ${comment.isAdminReply ? 'border-2 border-amber-300 shadow-sm' : 'border border-gray-100'
+                                                        }`}
                                                 />
-                                                <div className="flex-1">
+                                                <div className="flex-1 min-w-0">
                                                     <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className={`font-semibold text-sm ${comment.isAdminReply ? 'text-red-700' : 'text-gray-900'}`}>
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <span className={`font-semibold text-sm ${comment.isAdminReply ? 'text-amber-800' : 'text-gray-900'
+                                                                }`}>
                                                                 {comment.user?.name}
                                                             </span>
                                                             {comment.isAdminReply && (
-                                                                <span className="flex items-center gap-1 text-[10px] font-bold text-white bg-red-600 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
-                                                                    <ShieldCheck size={10} /> Admin
+                                                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+                                                                    <ShieldCheck size={10} /> Official Reply
                                                                 </span>
                                                             )}
-                                                            <span className="text-xs text-gray-500">
-                                                                {new Date(comment.createdAt).toLocaleDateString()}
+                                                            <span className="text-[11px] text-gray-400">
+                                                                {timeAgo(comment.createdAt)}
                                                             </span>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-1">
                                                             <button
                                                                 onClick={() => handleLikeComment(comment._id)}
-                                                                className={`flex items-center gap-1 text-xs transition-colors p-1 ${isCommentLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+                                                                className={`flex items-center gap-1 text-xs transition-colors p-1.5 rounded-lg ${isCommentLiked ? 'text-red-500' : 'text-gray-300 hover:text-red-400'
+                                                                    }`}
                                                             >
-                                                                <Heart size={14} fill={isCommentLiked ? "currentColor" : "none"} />
-                                                                {comment.likes?.length > 0 && <span>{comment.likes.length}</span>}
+                                                                <Heart size={13} fill={isCommentLiked ? "currentColor" : "none"} />
+                                                                {comment.likes?.length > 0 && <span className="font-medium">{comment.likes.length}</span>}
                                                             </button>
                                                             {(user?._id === comment.user?._id || user?.isAdmin) && (
                                                                 <button
                                                                     onClick={() => handleDeleteComment(comment._id)}
-                                                                    className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                                                                    className="text-gray-300 hover:text-red-400 transition-colors p-1.5 rounded-lg"
                                                                     title="Delete comment"
                                                                 >
-                                                                    <Trash2 size={14} />
+                                                                    <Trash2 size={13} />
                                                                 </button>
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <p className={`text-sm mt-1 leading-relaxed ${comment.isAdminReply ? 'text-gray-800' : 'text-gray-700'}`}>{comment.content}</p>
+                                                    <p className={`text-sm mt-1 leading-relaxed ${comment.isAdminReply ? 'text-amber-900/80' : 'text-gray-600'
+                                                        }`}>
+                                                        {comment.content}
+                                                    </p>
                                                 </div>
-                                            </div>
+                                            </motion.div>
                                         );
                                     })}
                                 </div>
                             ) : (
-                                <div className="text-center py-4 text-gray-500 text-sm italic">No comments yet.</div>
+                                <div className="text-center py-6 text-gray-400 text-sm">
+                                    <MessageCircle className="mx-auto mb-2 text-gray-200" size={24} />
+                                    No comments yet. Be the first!
+                                </div>
                             )}
                         </motion.div>
                     )}
                 </AnimatePresence>
             </div>
-        </motion.div>
+        </div>
     );
 };
 
