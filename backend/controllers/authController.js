@@ -1,11 +1,10 @@
-const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
 // @access  Public
-const authUser = asyncHandler(async (req, res) => {
+const authUser = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
@@ -23,12 +22,12 @@ const authUser = asyncHandler(async (req, res) => {
         res.status(401);
         throw new Error('Invalid email or password');
     }
-});
+};
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
-const registerUser = asyncHandler(async (req, res) => {
+const registerUser = async (req, res) => {
     const { name, email, password, pic } = req.body;
 
     const userExists = await User.findOne({ email });
@@ -58,12 +57,12 @@ const registerUser = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('Invalid user data');
     }
-});
+};
 
 // @desc    Update user profile
 // @route   PUT /api/auth/profile
 // @access  Private
-const updateUserProfile = asyncHandler(async (req, res) => {
+const updateUserProfile = async (req, res) => {
     const user = await User.findById(req.user._id);
 
     if (user) {
@@ -89,6 +88,6 @@ const updateUserProfile = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error('User not found');
     }
-});
+};
 
 module.exports = { authUser, registerUser, updateUserProfile };
