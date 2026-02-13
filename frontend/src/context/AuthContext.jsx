@@ -18,15 +18,15 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            console.log('Attempting login for:', email);
+
             const { data } = await api.post('/auth/login', { email, password });
-            console.log('Login success:', data);
+
             localStorage.setItem('user', JSON.stringify(data));
             setUser(data);
             toast.success('Login successful');
             return data;
         } catch (error) {
-            console.error('Login error detailed:', error);
+
             const message = error.response?.data?.message || 'Login failed - Check console for details';
             toast.error(message);
             throw error;
@@ -35,15 +35,15 @@ export const AuthProvider = ({ children }) => {
 
     const signup = async (name, email, password, pic) => {
         try {
-            console.log('Attempting signup for:', email);
+
             const { data } = await api.post('/auth/register', { name, email, password, pic });
-            console.log('Signup success:', data);
+
             localStorage.setItem('user', JSON.stringify(data));
             setUser(data);
             toast.success('Registration successful');
             return data;
         } catch (error) {
-            console.error('Signup error detailed:', error);
+
             const message = error.response?.data?.message || 'Registration failed - Check console for details';
             toast.error(message);
             throw error;
