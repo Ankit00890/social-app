@@ -1,11 +1,10 @@
-const asyncHandler = require('express-async-handler');
 const Comment = require('../models/Comment');
 const Post = require('../models/Post');
 
 // @desc    Create a comment
 // @route   POST /api/posts/:postId/comments
 // @access  Private
-const createComment = asyncHandler(async (req, res) => {
+const createComment = async (req, res) => {
     const { content } = req.body;
     const post = await Post.findById(req.params.postId);
 
@@ -22,20 +21,20 @@ const createComment = asyncHandler(async (req, res) => {
     });
 
     res.status(201).json(comment);
-});
+};
 
 // @desc    Get comments for a post
 // @route   GET /api/posts/:postId/comments
 // @access  Public
-const getComments = asyncHandler(async (req, res) => {
+const getComments = async (req, res) => {
     const comments = await Comment.find({ post: req.params.postId }).populate('user', 'name profilePic isAdmin');
     res.json(comments);
-});
+};
 
 // @desc    Reply as Admin
 // @route   POST /api/posts/:postId/comments/admin
 // @access  Private/Admin
-const adminReply = asyncHandler(async (req, res) => {
+const adminReply = async (req, res) => {
     const { content } = req.body;
     const post = await Post.findById(req.params.postId);
 
@@ -52,12 +51,12 @@ const adminReply = asyncHandler(async (req, res) => {
     });
 
     res.status(201).json(comment);
-});
+};
 
 // @desc    Delete a comment
 // @route   DELETE /api/posts/:postId/comments/:id
 // @access  Private
-const deleteComment = asyncHandler(async (req, res) => {
+const deleteComment = async (req, res) => {
     const comment = await Comment.findById(req.params.id);
 
     if (comment) {
@@ -75,12 +74,12 @@ const deleteComment = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error('Comment not found');
     }
-});
+};
 
 // @desc    Like a comment
 // @route   PUT /api/posts/:postId/comments/:id/like
 // @access  Private
-const likeComment = asyncHandler(async (req, res) => {
+const likeComment = async (req, res) => {
     const comment = await Comment.findById(req.params.id);
 
     if (comment) {
@@ -96,6 +95,6 @@ const likeComment = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error('Comment not found');
     }
-});
+};
 
 module.exports = { createComment, getComments, adminReply, deleteComment, likeComment };
