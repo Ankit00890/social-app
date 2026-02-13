@@ -19,6 +19,10 @@ app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
+app.get('/api/version', (req, res) => {
+  res.json({ version: '2.0-no-asynchandler', timestamp: new Date().toISOString() });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 
