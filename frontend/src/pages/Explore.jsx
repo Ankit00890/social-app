@@ -4,6 +4,7 @@ import Navbar from '../components/layout/Navbar';
 import Post from '../components/posts/Post';
 import { Search, TrendingUp, Hash, Flame, Zap, Compass, Filter, X } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
+import { API_BASE } from '../services/api';
 
 const Explore = () => {
     const { user } = useAuth();
@@ -35,7 +36,7 @@ const Explore = () => {
 
     const fetchPosts = async () => {
         try {
-            const res = await fetch('/api/posts');
+            const res = await fetch(`${API_BASE}/posts`);
             const data = await res.json();
             setPosts(data);
             setFilteredPosts(data);

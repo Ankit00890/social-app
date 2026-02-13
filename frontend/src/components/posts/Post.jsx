@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, MessageCircle, Share2, MoreHorizontal, Send, ShieldCheck, Trash2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useAuth from '../../hooks/useAuth';
+import { API_BASE } from '../../services/api';
 
 const Post = ({ post, onDelete }) => {
     const { user } = useAuth();
@@ -32,7 +33,7 @@ const Post = ({ post, onDelete }) => {
             return;
         }
         try {
-            const res = await fetch(`/api/posts/${post._id}/like`, {
+            const res = await fetch(`${API_BASE}/posts/${post._id}/like`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${user.token}`,
@@ -52,7 +53,7 @@ const Post = ({ post, onDelete }) => {
         if (!window.confirm('Are you sure you want to delete this post?')) return;
 
         try {
-            const res = await fetch(`/api/posts/${post._id}`, {
+            const res = await fetch(`${API_BASE}/posts/${post._id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${user.token}`,
@@ -80,7 +81,7 @@ const Post = ({ post, onDelete }) => {
 
         setLoadingComments(true);
         try {
-            const res = await fetch(`/api/posts/${post._id}/comments`);
+            const res = await fetch(`${API_BASE}/posts/${post._id}/comments`);
             const data = await res.json();
             setComments(data);
             setShowComments(true);
@@ -97,8 +98,8 @@ const Post = ({ post, onDelete }) => {
         if (!commentContent.trim()) return;
 
         const endpoint = isAdminReplyMode
-            ? `/api/posts/${post._id}/comments/admin`
-            : `/api/posts/${post._id}/comments`;
+            ? `${API_BASE}/posts/${post._id}/comments/admin`
+            : `${API_BASE}/posts/${post._id}/comments`;
 
         try {
             const res = await fetch(endpoint, {
@@ -130,7 +131,7 @@ const Post = ({ post, onDelete }) => {
     const handleDeleteComment = async (commentId) => {
         if (!window.confirm('Delete this comment?')) return;
         try {
-            const res = await fetch(`/api/posts/${post._id}/comments/${commentId}`, {
+            const res = await fetch(`${API_BASE}/posts/${post._id}/comments/${commentId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${user.token}`,
@@ -149,7 +150,7 @@ const Post = ({ post, onDelete }) => {
     const handleLikeComment = async (commentId) => {
         if (!user) return;
         try {
-            const res = await fetch(`/api/posts/${post._id}/comments/${commentId}/like`, {
+            const res = await fetch(`${API_BASE}/posts/${post._id}/comments/${commentId}/like`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${user.token}`,
@@ -276,8 +277,8 @@ const Post = ({ post, onDelete }) => {
                                                 onChange={(e) => setCommentContent(e.target.value)}
                                                 placeholder={isAdminReplyMode ? "Write an official admin reply..." : "Write a comment..."}
                                                 className={`w-full px-4 py-2.5 rounded-2xl border text-sm focus:outline-none transition-all duration-200 ${isAdminReplyMode
-                                                        ? 'border-amber-200 focus:ring-2 focus:ring-amber-100 bg-amber-50/50 placeholder-amber-400'
-                                                        : 'border-gray-200 focus:ring-2 focus:ring-indigo-100 bg-gray-50/50 placeholder-gray-400'
+                                                    ? 'border-amber-200 focus:ring-2 focus:ring-amber-100 bg-amber-50/50 placeholder-amber-400'
+                                                    : 'border-gray-200 focus:ring-2 focus:ring-indigo-100 bg-gray-50/50 placeholder-gray-400'
                                                     }`}
                                             />
                                             <div className="flex justify-between items-center mt-2">
@@ -300,10 +301,10 @@ const Post = ({ post, onDelete }) => {
                                                     type="submit"
                                                     disabled={!commentContent.trim()}
                                                     className={`ml-auto p-2.5 rounded-xl transition-all duration-200 ${!commentContent.trim()
-                                                            ? 'text-gray-300 bg-gray-100 cursor-not-allowed'
-                                                            : (isAdminReplyMode
-                                                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/20'
-                                                                : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md shadow-indigo-500/20')
+                                                        ? 'text-gray-300 bg-gray-100 cursor-not-allowed'
+                                                        : (isAdminReplyMode
+                                                            ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/20'
+                                                            : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md shadow-indigo-500/20')
                                                         }`}
                                                 >
                                                     <Send size={14} />
@@ -331,8 +332,8 @@ const Post = ({ post, onDelete }) => {
                                                 initial={{ opacity: 0, y: 10 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 className={`flex gap-3 p-3 rounded-xl transition-all ${comment.isAdminReply
-                                                        ? 'bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 shadow-sm'
-                                                        : 'hover:bg-gray-50/50'
+                                                    ? 'bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 shadow-sm'
+                                                    : 'hover:bg-gray-50/50'
                                                     }`}
                                             >
                                                 <img

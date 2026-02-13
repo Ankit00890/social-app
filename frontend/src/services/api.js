@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+export const API_BASE = 'https://social-app-1bbk.onrender.com/api';
+
 const api = axios.create({
-    baseURL: '/api', // Proxy in vite.config.js will handle this
+    baseURL: API_BASE,
     headers: {
         'Content-Type': 'application/json',
     },

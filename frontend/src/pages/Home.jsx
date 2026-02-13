@@ -6,6 +6,7 @@ import Post from '../components/posts/Post';
 import { Image, Send, Sparkles, TrendingUp, Users, Flame, Hash, Bookmark, Calendar, Link2, Upload, X } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import toast from 'react-hot-toast';
+import { API_BASE } from '../services/api';
 
 const Home = () => {
     const { user } = useAuth();
@@ -20,7 +21,7 @@ const Home = () => {
 
     const fetchPosts = async () => {
         try {
-            const res = await fetch('/api/posts');
+            const res = await fetch(`${API_BASE}/posts`);
             const data = await res.json();
             setPosts(data);
             setLoading(false);
@@ -42,7 +43,7 @@ const Home = () => {
             const body = { content };
             if (postImage) body.image = postImage;
 
-            const res = await fetch('/api/posts', {
+            const res = await fetch(`${API_BASE}/posts`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

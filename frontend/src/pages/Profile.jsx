@@ -4,6 +4,7 @@ import Navbar from '../components/layout/Navbar';
 import { User, Mail, Camera, Pencil, X, Check, Loader2, ShieldCheck } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import toast from 'react-hot-toast';
+import { API_BASE } from '../services/api';
 
 const Profile = () => {
     const { user, login } = useAuth();
@@ -24,7 +25,7 @@ const Profile = () => {
                 body.password = formData.password;
             }
 
-            const res = await fetch('/api/auth/profile', {
+            const res = await fetch(`${API_BASE}/auth/profile`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
